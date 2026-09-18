@@ -4,6 +4,7 @@ This project is a simplified version of the u8g2 (a veeery simple one). You can 
 ## Single Header
 For the project to be easy to use and to mod. We just create a single header file with all the functions and definitions you need.
 To add it to your main you need to call the `usg.h` and add the macro `#define USG_IMPLEMENTATION`, on the other files you need to just call the usg.h.
+
 The project **lacks string handlers**. As I said is a work in progress.
 
 ## Examples
