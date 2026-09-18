@@ -31,6 +31,12 @@ void usg_DrawPixel(usg_t *dev, int16_t x, int16_t y, usg_draw_mode_t mode);
 void usg_DrawLine(usg_t *dev, int16_t x0, int16_t y0, int16_t x1, int16_t y1,
                   usg_draw_mode_t mode);
 
+void usg_DrawHLine(usg_t *dev, int16_t x, int16_t y, int16_t w,
+                   usg_draw_mode_t mode);
+
+void usg_DrawVLine(usg_t *dev, int16_t x, int16_t y, int16_t h,
+                   usg_draw_mode_t mode);
+
 void usg_DrawFrame(usg_t *dev, int16_t x, int16_t y, uint16_t w, uint16_t h,
                    usg_draw_mode_t mode);
 
@@ -115,6 +121,18 @@ void usg_DrawLine(usg_t *dev, int16_t x0, int16_t y0, int16_t x1, int16_t y1,
   }
 }
 
+void usg_DrawHLine(usg_t *dev, int16_t x, int16_t y, int16_t w,
+                   usg_draw_mode_t mode) {
+  for (int16_t i = 0; i < w; i++)
+    usg_DrawPixel(dev, x + i, y, mode);
+}
+
+void usg_DrawVLine(usg_t *dev, int16_t x, int16_t y, int16_t h,
+                   usg_draw_mode_t mode) {
+  for (int16_t i = 0; i < h; i++)
+    usg_DrawPixel(dev, x, y + i, mode);
+}
+
 void usg_PrintAnsiStatic(const usg_t *dev) {
   printf("\033[H\033[J");
 
@@ -147,26 +165,21 @@ void usg_DrawXBM(usg_t *dev, int16_t x, int16_t y, uint16_t w, uint16_t h,
 
 void usg_DrawBox(usg_t *dev, int16_t x, int16_t y, uint16_t w, uint16_t h,
                  usg_draw_mode_t mode) {
-#warning "Isn't the best approach yet"
-  for (int16_t i = 0; i < h; i++) {
-    usg_DrawLine(dev, x, y + i, x + w - 1, y + i, mode);
-  }
+  for (int16_t i = 0; i < h; i++)
+    usg_DrawHLine(dev, x, y + i, w, mode);
 }
 
 void usg_DrawFrame(usg_t *dev, int16_t x, int16_t y, uint16_t w, uint16_t h,
                    usg_draw_mode_t mode) {
-#warning "Isn't the best approach yet"
-  int16_t x2 = x + w - 1;
-  int16_t y2 = y + h - 1;
-  usg_DrawLine(dev, x, y, x2, y, mode);
-  usg_DrawLine(dev, x, y2, x2, y2, mode);
-  usg_DrawLine(dev, x, y, x, y2, mode);
-  usg_DrawLine(dev, x2, y, x2, y2, mode);
+  usg_DrawHLine(dev, x, y, w, mode);
+  usg_DrawHLine(dev, x, y + h - 1, w, mode);
+
+  usg_DrawVLine(dev, x + w - 1, y, h, mode);
+  usg_DrawVLine(dev, x, y, h, mode);
 }
 
 void usg_DrawDisc(usg_t *dev, int16_t x0, int16_t y0, uint16_t r,
                   usg_draw_mode_t mode) {
-#warning "Isn't the best approach yet"
   if (!dev || !dev->buffer || r == 0)
     return;
 
@@ -174,15 +187,9 @@ void usg_DrawDisc(usg_t *dev, int16_t x0, int16_t y0, uint16_t r,
   int16_t y = 0;
   int16_t err = 1 - x;
 
-  while (x >= y) {
-    usg_DrawLine(dev, x0 - x, y0 + y, x0 + x, y0 + y, mode);
-    usg_DrawLine(dev, x0 - x, y0 - y, x0 + x, y0 - y, mode);
+  usg_DrawHLine(dev, x0 - r, y0, 2 * r + 1, mode);
 
-    if (y != x) {
-      usg_DrawLine(dev, x0 - y, y0 + x, x0 + y, y0 + x, mode);
-      usg_DrawLine(dev, x0 - y, y0 - x, x0 + y, y0 - x, mode);
-    }
-
+  while (x > y) {
     y++;
 
     if (err < 0) {
@@ -190,7 +197,13 @@ void usg_DrawDisc(usg_t *dev, int16_t x0, int16_t y0, uint16_t r,
     } else {
       x--;
       err += 2 * (y - x) + 1;
+
+      usg_DrawHLine(dev, x0 - y + 1, y0 + x + 1, 2 * (y - 1) + 1, mode);
+      usg_DrawHLine(dev, x0 - y + 1, y0 - x - 1, 2 * (y - 1) + 1, mode);
     }
+
+    usg_DrawHLine(dev, x0 - x, y0 + y, 2 * x + 1, mode);
+    usg_DrawHLine(dev, x0 - x, y0 - y, 2 * x + 1, mode);
   }
 }
 
