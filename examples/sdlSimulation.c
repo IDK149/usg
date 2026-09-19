@@ -1,4 +1,5 @@
 #define USG_IMPLEMENTATION
+#include "fonts/basic_font.h"
 #include "usg.h"
 #include <SDL2/SDL.h>
 
@@ -82,6 +83,8 @@ int main(int argc, char *argv[]) {
     usg_ClearBuffer(&screen);
 
     usg_DrawDisc(&screen, 32, 32, r, USG_MODE_SET);
+    usg_SetFont(&screen, usg_font_5x7_data);
+    usg_DrawStr(&screen, 12, 28, "Testing", USG_MODE_XOR);
 
     usg_RenderSDL(&screen, renderer);
     SDL_Delay(16);

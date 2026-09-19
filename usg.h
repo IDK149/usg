@@ -46,6 +46,9 @@ void usg_DrawBox(usg_t *dev, int16_t x, int16_t y, uint16_t w, uint16_t h,
 void usg_DrawDisc(usg_t *dev, int16_t x0, int16_t y0, uint16_t r,
                   usg_draw_mode_t mode);
 
+void usg_DrawChar(usg_t *dev, int16_t x, int16_t y, char c,
+                  usg_draw_mode_t mode);
+
 void usg_DrawTriangle(usg_t *dev, int16_t x0, int16_t y0, int16_t x1,
                       int16_t y1, int16_t x2, int16_t y2, usg_draw_mode_t mode);
 
@@ -207,9 +210,53 @@ void usg_DrawDisc(usg_t *dev, int16_t x0, int16_t y0, uint16_t r,
   }
 }
 
+void usg_SetFont(usg_t *dev, const void *font) {
+  if (dev) {
+    dev->font = font;
+  }
+}
+
+void usg_DrawChar(usg_t *dev, int16_t x, int16_t y, char c,
+                  usg_draw_mode_t mode) {
+  if (!dev || !dev->font)
+    return;
+
+  if (c < ' ' || c > 'z') {
+    c = '?';
+  }
+
+  uint16_t index = (c - ' ') * 5;
+
+  const uint8_t *font_data = (const uint8_t *)dev->font;
+
+  for (uint8_t col = 0; col < 5; col++) {
+    uint8_t byte_columna = font_data[index + col];
+
+    for (uint8_t row = 0; row < 7; row++) {
+      if (byte_columna & (1 << row)) {
+        usg_DrawPixel(dev, x + col, y + row, mode);
+      }
+    }
+  }
+}
+
 void usg_DrawStr(usg_t *dev, int16_t x, int16_t y, const char *str,
                  usg_draw_mode_t mode) {
-#warning "Not implement yet"
+  if (!dev || !dev->font || !str)
+    return;
+
+  int16_t cursor_x = x;
+
+  while (*str) {
+    if (*str == '\n') {
+      cursor_x = x;
+      y += 8;
+    } else {
+      usg_DrawChar(dev, cursor_x, y, *str, mode);
+      cursor_x += 6;
+    }
+    str++;
+  }
 }
 
 #endif
